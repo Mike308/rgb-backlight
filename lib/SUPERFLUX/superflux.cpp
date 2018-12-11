@@ -1,33 +1,34 @@
 #include "superflux.h"
 #include "animation.h"
 
-Superflux::Superflux(uint8_t r, uint8_t g, uint8_t b){
-    this->rPin = r;
-    this->gPin = g;
-    this->bPin = b;
-    pinMode(r,OUTPUT);
-	pinMode(g,OUTPUT);
-	pinMode(b,OUTPUT);
+Superflux::Superflux(uint8_t r, uint8_t g, uint8_t b) {
+  this->rPin = r;
+  this->gPin = g;
+  this->bPin = b;
+  pinMode(rPin, OUTPUT);
+  pinMode(gPin, OUTPUT);
+  pinMode(bPin, OUTPUT);
 }
 
-void Superflux::setRGB(uint8_t r, uint8_t b, uint8_t g){
-    analogWrite(rPin, r);
-    analogWrite(gPin, g);
-    analogWrite(bPin, b);
+void Superflux::setRGB(uint8_t red, uint8_t green, uint8_t blue) {
+  analogWrite(5, red);
+  analogWrite(6, green);
+  analogWrite(3, blue);
 }
 
-void Superflux::animation(Animation animation){
-    unsigned long currentTime = millis();
-    if (animation.getMode() == Animation::HSV_ROTATION){
-        hsvRotation(currentTime, animation.getSpeed());
-    }else if (animation.getMode() == Animation::RANDOM_COLOR){
+void Superflux::animation(Animation * animation) {
+  unsigned long currentTime = millis();
+  if (animation->getMode() == Animation::HSV_ROTATION) {
+    hsvRotation(currentTime, animation->getSpeed());
+  } else if (animation->getMode() == Animation::RANDOM_COLOR) {
+    randomColor(currentTime, animation->getSpeed());
+  } else if (animation->getMode() == Animation::NO_ANIMATION) {
 
-    }else if (animation.getMode() == Animation::NO_ANIMATION){
-
-    }
+  }
 }
 
-void Superflux::setHSV(uint16_t h, uint16_t s, uint16_t v, uint8_t *r, uint8_t *g, uint8_t *b){
+void Superflux::setHSV(uint16_t h, uint16_t s, uint16_t v, uint8_t *r,
+                       uint8_t *g, uint8_t *b) {
   uint8_t diff;
   uint8_t red, green, blue;
 
@@ -80,19 +81,28 @@ void Superflux::setHSV(uint16_t h, uint16_t s, uint16_t v, uint8_t *r, uint8_t *
   *b = blue;
 }
 
-void Superflux::hsvRotation(unsigned long currentTime, unsigned long speed){
-    static unsigned long previousTime = 0;
-    static uint16_t h = 0;
-    if (currentTime - previousTime >= speed){
-        previousTime = currentTime;
-        setHSV(h, 100, 100, &r, &g, &b);
-        setRGB(r, g, b);
-        if (h > 360) h = 0;
-        h++;
-
-    }
+void Superflux::hsvRotation(unsigned long currentTime, unsigned long speed) {
+  static unsigned long previousTime = 0;
+  static uint16_t h = 0;
+  if (currentTime - previousTime >= speed) {
+    previousTime = currentTime;
+    setHSV(h, 100, 100, &r, &g, &b);
+    setRGB(r, g, b);
+    if (h > 360)
+      h = 0;
+    h++;
+  }
 }
 
-
+void Superflux::randomColor(unsigned long currentTime, unsigned long speed) {
+  static unsigned long previousTime = 0;
+  if (currentTime - previousTime >= speed) {
+    uint8_t r = random(256);
+    uint8_t g = random(256);
+    uint8_t b = random(256);
+    previousTime = currentTime;
+    setRGB(r, g, b);
+  }
+}
 
 

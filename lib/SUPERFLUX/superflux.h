@@ -5,8 +5,8 @@
 class Superflux {
     public:
         Superflux(uint8_t rPin, uint8_t gPin, uint8_t bPin);
-        void animation(Animation animation);
-        void setRGB(uint8_t r, uint8_t g, uint8_t b);
+        void animation(Animation * animation);
+        void setRGB(uint8_t red, uint8_t green, uint8_t blue);
     private:
         uint8_t rPin;
         uint8_t gPin;
@@ -16,6 +16,7 @@ class Superflux {
         uint8_t b = 0;
         void setHSV(uint16_t h, uint16_t s, uint16_t v, uint8_t *r, uint8_t *g, uint8_t *b);
         void hsvRotation(unsigned long currentTime, unsigned long speed);
+        void randomColor(unsigned long currentTime, unsigned long speed);
 
 };
 #endif
