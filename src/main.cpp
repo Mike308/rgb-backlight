@@ -1,19 +1,26 @@
 #include <Arduino.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
 #include "USART.h"
 #include "superflux.h"
 #include "animation.h"
+
+void rxParse(String str);
 
 Usart usart;
 Animation * animation = new Animation(Animation::HSV_ROTATION, 1000, 1);
 Superflux superflux(5, 6, 3);
 String rxString;
-void rxParse(String str);
+OneWire oneWire(9);
+DallasTemperature temperatureSensor(&oneWire);
 
 void setup() {
   // put your setup code here, to run once:
   usart.setOnReceiveCallback(&rxParse);
   Serial.begin(9600);
   Serial.println("Test");
+  temperatureSensor.begin();
 }
 
 void loop() {
@@ -47,6 +54,13 @@ void rxParse(String str) {
     }else if (mode == Animation::NO_ANIMATION){
       animation->setMode(Animation::NO_ANIMATION);
       Serial.println(animation->toString());
+    }else if (mode == Animation::BREATHING){
+      animation->setMode(Animation::BREATHING);
+      animation->setSpeed(speed);
+      animation->setStep(step);
+      char *colorStr = strtok(NULL, ",");
+      uint16_t color = atoi(colorStr);
+      animation->setColor(color);
     }
   } else if (!strcmp("AT+RGB", atCommand)) {
     char *r = strtok(NULL, ",");
@@ -57,6 +71,10 @@ void rxParse(String str) {
     uint8_t bVal = atoi(b);
     superflux.setRGB(rVal, gVal, bVal);
     animation->setMode(Animation::NO_ANIMATION);
+  }else if (!strcmp("AT+TEMP", atCommand)){
+     temperatureSensor.requestTemperatures();
+     Serial.print("+TEMP=");
+     Serial.println(temperatureSensor.getTempCByIndex(0));
   }
   rxString = "";
 }
