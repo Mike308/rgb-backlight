@@ -1,7 +1,11 @@
 #include <Arduino.h>
 #include "USART.h"
+#include "superflux.h"
+#include "animation.h"
 
 Usart usart;
+Animation * animation = new Animation(Animation::HSV_ROTATION, 1000, 1);
+Superflux superflux(5, 6, 3);
 String rxString;
 void rxParse(String str);
 
@@ -14,26 +18,48 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  superflux.animation(animation);
   usart.usartEvent(rxString);
 }
 
 void rxParse(String str) {
-
   char buf[256];
   str.toCharArray(buf, str.length());
   char *atCommand = strtok(buf, "=,?");
   Serial.println(str);
-
-  if (!strcmp("AT+HSVROT", atCommand)) {
-    char *rotationTimeStr = strtok(NULL, ",");
-    uint16_t rotationTime = atoi(rotationTimeStr);
-    Serial.print("Rotation speed: ");
-    Serial.println(rotationTime);
-  }else if (!strcmp("AT+RGB", atCommand)){
-    
+  if (!strcmp("AT+ANIM", atCommand)) {
+    char *modeStr = strtok(NULL, ",");
+    char *speedStr = strtok(NULL, ",");
+    char *stepStr = strtok(NULL, ",");
+    uint16_t speed = atoi(speedStr);
+    uint8_t step = atoi(stepStr);
+    uint8_t mode = atoi(modeStr);
+    if (mode == Animation::HSV_ROTATION) {
+      animation->setMode(Animation::HSV_ROTATION);
+      animation->setSpeed(speed);
+      animation->setStep(step);
+      Serial.println(animation->toString());
+    }else if (mode == Animation::RANDOM_COLOR){
+      animation->setMode(Animation::RANDOM_COLOR);
+      animation->setSpeed(speed);
+      animation->setStep(step);
+      Serial.println(animation->toString());
+    }else if (mode == Animation::NO_ANIMATION){
+      animation->setMode(Animation::NO_ANIMATION);
+      Serial.println(animation->toString());
+    }
+  } else if (!strcmp("AT+RGB", atCommand)) {
+    char *r = strtok(NULL, ",");
+    char *g = strtok(NULL, ",");
+    char *b = strtok(NULL, ",");
+    uint8_t rVal = atoi(r);
+    uint8_t gVal = atoi(g);
+    uint8_t bVal = atoi(b);
+    superflux.setRGB(rVal, gVal, bVal);
+    animation->setMode(Animation::NO_ANIMATION);
   }
+  rxString = "";
 }
-
 
 void serialEvent() {
   while (Serial.available()) {
