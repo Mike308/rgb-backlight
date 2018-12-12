@@ -22,7 +22,9 @@ void Superflux::animation(Animation * animation) {
     hsvRotation(currentTime, animation);
   } else if (animation->getMode() == Animation::RANDOM_COLOR) {
     randomColor(currentTime, animation);
-  } else if (animation->getMode() == Animation::NO_ANIMATION) {
+  }else if (animation->getMode() == Animation::BREATHING){
+    breathingColor(currentTime, animation);
+  }  else if (animation->getMode() == Animation::NO_ANIMATION) {
 
   }
 }
@@ -97,11 +99,31 @@ void Superflux::hsvRotation(unsigned long currentTime, Animation *animation) {
 void Superflux::randomColor(unsigned long currentTime, Animation *animation) {
   static unsigned long previousTime = 0;
   if (currentTime - previousTime >= animation->getSpeed()) {
+    previousTime = currentTime;
     uint8_t r = random(256);
     uint8_t g = random(256);
     uint8_t b = random(256);
-    previousTime = currentTime;
     setRGB(r, g, b);
+  }
+}
+
+void Superflux::breathingColor(unsigned long currentTime, Animation *animation){
+  static unsigned long previousTime = 0;
+  static int value = 0;
+  static uint8_t state = 0;
+  if (currentTime - previousTime >= animation->getSpeed()){
+     previousTime = currentTime;
+    if (state == 0){
+      setHSV(animation->getColor(), 100, value, &r, &g, &b);
+      setRGB(r, g, b);
+      value+=animation->getStep();
+      if (value == 100) state = 1;
+    } else {
+        setHSV(animation->getColor(), 100, value, &r, &g, &b);
+        setRGB(r, g, b);
+        value-=animation->getStep();
+        if (value == 0) state = 0;
+    }
   }
 }
 
