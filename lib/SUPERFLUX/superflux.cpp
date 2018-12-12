@@ -19,9 +19,9 @@ void Superflux::setRGB(uint8_t red, uint8_t green, uint8_t blue) {
 void Superflux::animation(Animation * animation) {
   unsigned long currentTime = millis();
   if (animation->getMode() == Animation::HSV_ROTATION) {
-    hsvRotation(currentTime, animation->getSpeed());
+    hsvRotation(currentTime, animation);
   } else if (animation->getMode() == Animation::RANDOM_COLOR) {
-    randomColor(currentTime, animation->getSpeed());
+    randomColor(currentTime, animation);
   } else if (animation->getMode() == Animation::NO_ANIMATION) {
 
   }
@@ -81,22 +81,22 @@ void Superflux::setHSV(uint16_t h, uint16_t s, uint16_t v, uint8_t *r,
   *b = blue;
 }
 
-void Superflux::hsvRotation(unsigned long currentTime, unsigned long speed) {
+void Superflux::hsvRotation(unsigned long currentTime, Animation *animation) {
   static unsigned long previousTime = 0;
   static uint16_t h = 0;
-  if (currentTime - previousTime >= speed) {
+  if (currentTime - previousTime >= animation->getSpeed()) {
     previousTime = currentTime;
     setHSV(h, 100, 100, &r, &g, &b);
     setRGB(r, g, b);
     if (h > 360)
       h = 0;
-    h++;
+    h+=animation->getStep();
   }
 }
 
-void Superflux::randomColor(unsigned long currentTime, unsigned long speed) {
+void Superflux::randomColor(unsigned long currentTime, Animation *animation) {
   static unsigned long previousTime = 0;
-  if (currentTime - previousTime >= speed) {
+  if (currentTime - previousTime >= animation->getSpeed()) {
     uint8_t r = random(256);
     uint8_t g = random(256);
     uint8_t b = random(256);

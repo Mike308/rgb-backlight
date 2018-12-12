@@ -15,8 +15,8 @@ class Superflux {
         uint8_t g = 0;
         uint8_t b = 0;
         void setHSV(uint16_t h, uint16_t s, uint16_t v, uint8_t *r, uint8_t *g, uint8_t *b);
-        void hsvRotation(unsigned long currentTime, unsigned long speed);
-        void randomColor(unsigned long currentTime, unsigned long speed);
+        void hsvRotation(unsigned long currentTime, Animation *animation);
+        void randomColor(unsigned long currentTime, Animation *animation);
 
 };
 #endif
