@@ -18,8 +18,10 @@ void Animation::setMode(uint8_t mode){
     this->mode = mode;
 }
 
-void Animation::setColor(uint16_t color){
-    this->color = color;
+void Animation::setColor(uint16_t hue, uint8_t saturation, uint8_t value){
+    color.setHue(hue);
+    color.setSaturation(saturation);
+    color.setValue(value);
 }
 
 unsigned long Animation::getSpeed(){
@@ -34,11 +36,11 @@ uint8_t Animation::getMode(){
     return mode;
 }
 
-uint16_t Animation::getColor(){
+HSV Animation::getColor(){
     return color;
 }
 
 String Animation::toString(){
-    return "mode: " + String(mode) + " step" + String(step) + " speed: " + String(speed) + " color" + String(color); 
+    return "mode: " + String(mode) + " step" + String(step) + " speed: " + String(speed);
 }
 

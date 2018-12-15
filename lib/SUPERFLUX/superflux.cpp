@@ -16,6 +16,11 @@ void Superflux::setRGB(uint8_t red, uint8_t green, uint8_t blue) {
   analogWrite(3, blue);
 }
 
+void Superflux::setHSV(uint16_t h, uint16_t s, uint16_t v){
+  setHSV(h, s, v, &r, &g, &b);
+  setRGB(r, g, b);
+}
+
 void Superflux::animation(Animation * animation) {
   unsigned long currentTime = millis();
   if (animation->getMode() == Animation::HSV_ROTATION) {
@@ -34,6 +39,10 @@ void Superflux::setHSV(uint16_t h, uint16_t s, uint16_t v, uint8_t *r,
   uint8_t diff;
   uint8_t red, green, blue;
 
+  
+  hue = h;
+  saturation = s;
+  value = v;
   if (h > 359)
     h = 359;
   if (s > 100)
@@ -83,13 +92,63 @@ void Superflux::setHSV(uint16_t h, uint16_t s, uint16_t v, uint8_t *r,
   *b = blue;
 }
 
+RGB Superflux::hsvToRGB(uint16_t h, uint8_t s, uint8_t v){
+  uint8_t diff;
+  uint8_t red, green, blue;
+  if (h > 359)
+    h = 359;
+  if (s > 100)
+    s = 100;
+  if (v > 100)
+    v = 100;
+
+  if (h < 61) {
+    red = 255;
+    green = (425 * h) / 100;
+    blue = 0;
+  } else if (h < 121) {
+    red = 255 - ((425 * (h - 60)) / 100);
+    green = 255;
+    blue = 0;
+  } else if (h < 181) {
+    red = 0;
+    green = 255;
+    blue = (425 * (h - 120)) / 100;
+  } else if (h < 241) {
+    red = 0;
+    green = 255 - ((425 * (h - 180)) / 100);
+    blue = 255;
+  } else if (h < 301) {
+    red = (425 * (h - 240)) / 100;
+    green = 0;
+    blue = 255;
+  } else {
+    red = 255;
+    green = 0;
+    blue = 255 - ((425 * (h - 300)) / 100);
+  }
+
+  s = 100 - s;
+  diff = ((255 - red) * s) / 100;
+  red = red + diff;
+  diff = ((255 - green) * s) / 100;
+  green = green + diff;
+  diff = ((255 - blue) * s) / 100;
+  blue = blue + diff;
+
+  red = (red * v) / 100;
+  green = (green * v) / 100;
+  blue = (blue * v) / 100;
+  return RGB(red, green, blue);
+}
+
 void Superflux::hsvRotation(unsigned long currentTime, Animation *animation) {
   static unsigned long previousTime = 0;
   static uint16_t h = 0;
   if (currentTime - previousTime >= animation->getSpeed()) {
     previousTime = currentTime;
-    setHSV(h, 100, 100, &r, &g, &b);
-    setRGB(r, g, b);
+    RGB rgbColor = hsvToRGB(h, 100, 100);
+    setRGB(rgbColor.getRed(), rgbColor.getGreen(), rgbColor.getBlue());
     if (h > 360)
       h = 0;
     h+=animation->getStep();
@@ -114,13 +173,13 @@ void Superflux::breathingColor(unsigned long currentTime, Animation *animation){
   if (currentTime - previousTime >= animation->getSpeed()){
      previousTime = currentTime;
     if (state == 0){
-      setHSV(animation->getColor(), 100, value, &r, &g, &b);
-      setRGB(r, g, b);
-      value+=animation->getStep();
-      if (value == 100) state = 1;
+      RGB rgbColor = hsvToRGB(animation->getColor().getHue(), animation->getColor().getSaturation(), value);
+      setRGB(rgbColor.getRed(), rgbColor.getGreen(), rgbColor.getBlue());
+      value+=animation->getStep();  
+      if (value == animation->getColor().getValue()) state = 1;
     } else {
-        setHSV(animation->getColor(), 100, value, &r, &g, &b);
-        setRGB(r, g, b);
+        RGB rgbColor = hsvToRGB(animation->getColor().getHue(), animation->getColor().getSaturation(), value);
+        setRGB(rgbColor.getRed(), rgbColor.getGreen(), rgbColor.getBlue());
         value-=animation->getStep();
         if (value == 0) state = 0;
     }
