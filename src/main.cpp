@@ -9,7 +9,7 @@
 void rxParse(String str);
 
 Usart usart;
-Animation * animation = new Animation(Animation::HSV_ROTATION, 1000, 1);
+Animation *animation = new Animation(Animation::HSV_ROTATION, 25, 1);
 Superflux superflux(5, 6, 3);
 String rxString;
 OneWire oneWire(9);
@@ -46,35 +46,38 @@ void rxParse(String str) {
       animation->setSpeed(speed);
       animation->setStep(step);
       Serial.println(animation->toString());
-    }else if (mode == Animation::RANDOM_COLOR){
+    } else if (mode == Animation::RANDOM_COLOR) {
       animation->setMode(Animation::RANDOM_COLOR);
       animation->setSpeed(speed);
       animation->setStep(step);
       Serial.println(animation->toString());
-    }else if (mode == Animation::NO_ANIMATION){
+    } else if (mode == Animation::NO_ANIMATION) {
       animation->setMode(Animation::NO_ANIMATION);
       Serial.println(animation->toString());
-    }else if (mode == Animation::BREATHING){
+    } else if (mode == Animation::BREATHING) {
       animation->setMode(Animation::BREATHING);
       animation->setSpeed(speed);
       animation->setStep(step);
-      char *colorStr = strtok(NULL, ",");
-      uint16_t color = atoi(colorStr);
-      animation->setColor(color);
+      char *hue = strtok(NULL, ",");
+      char *saturation = strtok(NULL, ",");
+      char *value = strtok(NULL, ",");
+      animation->setColor(atoi(hue), atoi(saturation), atoi(value));
     }
   } else if (!strcmp("AT+RGB", atCommand)) {
     char *r = strtok(NULL, ",");
     char *g = strtok(NULL, ",");
     char *b = strtok(NULL, ",");
-    uint8_t rVal = atoi(r);
-    uint8_t gVal = atoi(g);
-    uint8_t bVal = atoi(b);
-    superflux.setRGB(rVal, gVal, bVal);
+    superflux.setRGB(atoi(r), atoi(g), atoi(b));
     animation->setMode(Animation::NO_ANIMATION);
-  }else if (!strcmp("AT+TEMP", atCommand)){
-     temperatureSensor.requestTemperatures();
-     Serial.print("+TEMP=");
-     Serial.println(temperatureSensor.getTempCByIndex(0));
+  } else if (!strcmp("AT+HSV", atCommand)) {
+    char *h = strtok(NULL, ",");
+    char *s = strtok(NULL, ",");
+    char *v = strtok(NULL, ",");
+    animation->setMode(Animation::NO_ANIMATION);
+    superflux.setHSV(atoi(h), atoi(s), atoi(v));
+  } else if (!strcmp("AT+TEMP", atCommand)) {
+    temperatureSensor.requestTemperatures();
+    Serial.println(temperatureSensor.getTempCByIndex(0));
   }
   rxString = "";
 }
