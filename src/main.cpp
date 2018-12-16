@@ -19,7 +19,6 @@ void setup() {
   // put your setup code here, to run once:
   usart.setOnReceiveCallback(&rxParse);
   Serial.begin(9600);
-  Serial.println("Test");
   temperatureSensor.begin();
 }
 
@@ -33,7 +32,6 @@ void rxParse(String str) {
   char buf[256];
   str.toCharArray(buf, str.length());
   char *atCommand = strtok(buf, "=,?");
-  Serial.println(str);
   if (!strcmp("AT+ANIM", atCommand)) {
     char *modeStr = strtok(NULL, ",");
     char *speedStr = strtok(NULL, ",");
@@ -45,15 +43,12 @@ void rxParse(String str) {
       animation->setMode(Animation::HSV_ROTATION);
       animation->setSpeed(speed);
       animation->setStep(step);
-      Serial.println(animation->toString());
     } else if (mode == Animation::RANDOM_COLOR) {
       animation->setMode(Animation::RANDOM_COLOR);
       animation->setSpeed(speed);
       animation->setStep(step);
-      Serial.println(animation->toString());
     } else if (mode == Animation::NO_ANIMATION) {
       animation->setMode(Animation::NO_ANIMATION);
-      Serial.println(animation->toString());
     } else if (mode == Animation::BREATHING) {
       animation->setMode(Animation::BREATHING);
       animation->setSpeed(speed);
